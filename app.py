@@ -3,6 +3,7 @@
 Run with: `streamlit run app.py`
 """
 
+import os
 from datetime import date
 
 import streamlit as st
@@ -13,6 +14,15 @@ from digital_twin.agent import chat
 from digital_twin.models import CATEGORIES, HORIZONS, PRIORITIES, STATUSES
 
 load_dotenv()
+
+# Streamlit Cloud exposes secrets via st.secrets, not os.environ. Bridge them
+# so the Anthropic SDK (which reads ANTHROPIC_API_KEY from the env) works.
+if not os.environ.get("ANTHROPIC_API_KEY"):
+    try:
+        os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
+    except Exception:
+        pass
+
 db.init_db()
 
 st.set_page_config(page_title="Digital Twin", page_icon=None, layout="wide")
